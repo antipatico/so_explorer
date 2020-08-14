@@ -3,6 +3,9 @@
 import sys
 from subprocess import Popen, PIPE, DEVNULL
 from Crypto.Hash import SHA256
+import sqlalchemy
+
+db_file = "explore.db"
 
 def read_symbols(filename):
 	p = Popen(["/usr/bin/nm", "-D", "-C", filename], stdin=DEVNULL, stdout=PIPE, bufsize=2048)
@@ -31,9 +34,11 @@ def hash_file(filename):
 			h.update(buf)
 	return h.hexdigest()
 
+
 def main(args):
-	read_symbols(args[1])
-	print(hash_file(args[1]))
+	syms = read_symbols(args[1])
+	hash = hash_file(args[1])
+	engine = sqlalchemy.create_engine("sqlite:///" + db_file)
 
 if __name__== "__main__":
 	main(sys.argv)
