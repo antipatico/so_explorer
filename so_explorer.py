@@ -8,8 +8,10 @@ from Crypto.Hash import SHA256
 import argparse
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, func
 from sqlalchemy.orm import sessionmaker, relationship
+
+import web_interface
 
 default_db_file = "explore.db"
 
@@ -32,6 +34,12 @@ class Symbol(Base):
 	s_type = Column(String(1))
 
 SoFile.symbols = relationship("Symbol", order_by=Symbol.id, back_populates="sofile")
+
+def symbols_summary(session):
+	"""return list of symbols + how many times they're used"""
+	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name)
+	for i, j, k in rc:
+		print(i, j, k)
 
 def read_symbols(filename):
 	p = Popen(["/usr/bin/nm", "-D", "-C", filename], stdin=DEVNULL, stdout=PIPE, bufsize=2048)
@@ -94,11 +102,13 @@ def init_sql(db_filename):
 
 def main():
 	parser = argparse.ArgumentParser(prog="so_explorer", description="Easily browse symbols from modules")
-	subparsers = parser.add_subparsers(dest="action")
 	parser.add_argument('-d', "--database", dest="db_file", help="database filename", default=default_db_file)
+	subparsers = parser.add_subparsers(dest="action")
 	build_parser = subparsers.add_parser("build", help="build or update a database")
 	build_parser.add_argument('-r', "--recursive", help="scan ELF files recursively", action="store_true")
-	build_parser.add_argument("files", type=str, nargs="*", help="files or directories to add to database")
+	build_parser.add_argument("files", type=str, nargs="+", help="files or directories to add to database")
+	serve_parser = subparsers.add_parser("serve", help="start the web server")
+	
 	args = parser.parse_args()
 	
 	init_sql(args.db_file)
@@ -113,6 +123,9 @@ def main():
 		else:
 			for f in args.files:
 				process_sofile(f)
-
+	elif args.action == "serve":
+		web_interface.run(session)
+	else:
+		parser.print_help()
 if __name__== "__main__":
 	main()
