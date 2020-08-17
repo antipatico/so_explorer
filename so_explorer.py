@@ -2,14 +2,16 @@
 
 import sys
 import os.path
+import os
 from subprocess import Popen, PIPE, DEVNULL
 from Crypto.Hash import SHA256
+import argparse
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 
-db_file = "explore.db"
+default_db_file = "explore.db"
 
 Base = declarative_base()
 Session = sessionmaker()
@@ -58,11 +60,22 @@ def hash_file(filename):
 			h.update(buf)
 	return h.hexdigest()
 
+def is_elf_file(filename):
+	with open(filename, "rb") as f:
+		data = f.read(4)
+		if data != b"\x7fELF":
+			return False
+		else:
+			return True
+
 def process_sofile(filename):
+	if not is_elf_file(filename):
+		print("WARNING: file %s not ELF file"%(os.path.basename(filename)))
+		return
 	hash = hash_file(filename)
 	result = session.query(SoFile).filter(SoFile.hash == hash).first()
 	if result is not None:
-		print("file %s is already in db as %s"%(os.path.basename(filename), result.filename))
+		print("WARNING: file %s is already in db as %s"%(os.path.basename(filename), result.filename))
 		return
 	syms = read_symbols(filename)
 	sofile = SoFile(filename=os.path.basename(filename), path=filename, hash=hash)
@@ -72,13 +85,34 @@ def process_sofile(filename):
 		session.add(s)
 	session.commit()
 
-def main(args):
+def init_sql(db_filename):
 	global session
-	engine = sqlalchemy.create_engine("sqlite:///" + db_file, echo=True)
+	engine = sqlalchemy.create_engine("sqlite:///" + db_filename)
 	Base.metadata.create_all(engine)
 	Session.configure(bind=engine)
 	session = Session()
-	process_sofile(args[1])
+
+def main():
+	parser = argparse.ArgumentParser(prog="so_explorer", description="Easily browse symbols from modules")
+	subparsers = parser.add_subparsers(dest="action")
+	parser.add_argument('-d', "--database", dest="db_file", help="database filename", default=default_db_file)
+	build_parser = subparsers.add_parser("build", help="build or update a database")
+	build_parser.add_argument('-r', "--recursive", help="scan ELF files recursively", action="store_true")
+	build_parser.add_argument("files", type=str, nargs="*", help="files or directories to add to database")
+	args = parser.parse_args()
+	
+	init_sql(args.db_file)
+	print(args)
+	if args.action == "build":
+		if args.recursive:
+			for d in args.files:
+				for root, dirs, files in os.walk(d):
+					for f in files:
+						filename = root + os.sep + f
+						process_sofile(filename)
+		else:
+			for f in args.files:
+				process_sofile(f)
 
 if __name__== "__main__":
-	main(sys.argv)
+	main()
