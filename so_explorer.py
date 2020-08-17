@@ -16,17 +16,17 @@ Session = sessionmaker()
 
 class SoFile(Base):
 	__tablename__ = "sofiles"
-	id = Column(Integer, primary_key = True)
-	filename = Column(String)
+	id = Column(Integer, primary_key=True)
+	filename = Column(String, index=True)
 	path = Column(String)
-	hash = Column(String(32))
+	hash = Column(String(32), index=True)
 
 class Symbol(Base):
 	__tablename__ = "symbols"
 	id = Column(Integer, primary_key = True)
 	sofile_id = Column(Integer, ForeignKey("sofiles.id"))
 	sofile = relationship("SoFile", back_populates="symbols")
-	name = Column(String)
+	name = Column(String, index=True)
 	s_type = Column(String(1))
 
 SoFile.symbols = relationship("Symbol", order_by=Symbol.id, back_populates="sofile")
