@@ -35,11 +35,12 @@ class Symbol(Base):
 
 SoFile.symbols = relationship("Symbol", order_by=Symbol.id, back_populates="sofile")
 
-def symbols_summary(session):
+def symbols_summary(session, limit=1000):
 	"""return list of symbols + how many times they're used"""
-	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name)
-	for i, j, k in rc:
-		print(i, j, k)
+	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name).limit(1000)
+	#for i, j, k in rc:
+	#	print(i, j, k)
+	return rc
 
 def read_symbols(filename):
 	p = Popen(["/usr/bin/nm", "-D", "-C", filename], stdin=DEVNULL, stdout=PIPE, bufsize=2048)

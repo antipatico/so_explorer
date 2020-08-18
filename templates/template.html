@@ -4,8 +4,20 @@
 <title>SO explorer</title>
 </head>
 <body>
-{% if name %}
-  <h1>Hello {{ name }}!</h1>
+
+{% if symbols %}
+
+<table style="width:100%">
+	<tr>
+		<th>name</th><th>type</th><th>count</th>
+	</tr>
+	{% for name, s_type, count in symbols %}
+	<tr>
+		<td>{{ name }}</td><td>{{ s_type }}</td><td>{{ count }}</td>
+	</tr>
+	{%endfor %}
+</table>
+
 {% else %}
   <h1>Hello, World!</h1>
 {% endif %}
