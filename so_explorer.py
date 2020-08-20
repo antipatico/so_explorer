@@ -37,9 +37,21 @@ SoFile.symbols = relationship("Symbol", order_by=Symbol.id, back_populates="sofi
 
 def symbols_summary(session, limit=1000):
 	"""return list of symbols + how many times they're used"""
-	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name).limit(1000)
-	#for i, j, k in rc:
-	#	print(i, j, k)
+	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name).limit(limit)
+	return rc
+
+def symbols_search(session, search, limit=1000):
+	"""return list of symbols + how many times they're used from a search query"""
+	search = "%" + search + "%"
+	rc = session.query(Symbol.name, Symbol.s_type, func.count(Symbol.s_type)).filter(Symbol.name.like(search)).group_by(Symbol.name, Symbol.s_type).order_by(Symbol.name).limit(limit)
+	return rc
+
+def symbol_get(session, sym):
+	rc = session.query(Symbol).filter(Symbol.name == sym)
+	return rc
+
+def sofile_get(session, id):
+	rc = session.query(SoFile).filter(SoFile.id == id).first()
 	return rc
 
 def read_symbols(filename):

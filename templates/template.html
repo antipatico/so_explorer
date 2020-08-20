@@ -2,9 +2,19 @@
 <html>
 <head>
 <title>SO explorer</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
 </head>
 <body>
 
+<form action="/search" method="POST">
+	<input type="text" name="search">
+	<input type="submit" value="Search symbol">
+</form>
 {% if symbols %}
 
 <table style="width:100%">
@@ -13,13 +23,47 @@
 	</tr>
 	{% for name, s_type, count in symbols %}
 	<tr>
-		<td>{{ name }}</td><td>{{ s_type }}</td><td>{{ count }}</td>
+		<td><a href="/symbol?sym={{ name | urlencode }}">{{ name }}</a></td><td>{{ s_type }}</td><td>{{ count }}</td>
 	</tr>
 	{%endfor %}
 </table>
 
+{% elif symbol %}
+
+	<div>Cross-reference of {{ symbol }}</div>
+
+<table style="width:100%">
+	<tr>
+		<th>name</th><th>library</th><th>type</th>
+	</tr>
+	{% for s in xrefs %}
+	<tr>
+		<td><a href="/symbol?sym={{ s.name | urlencode }}">{{ s.name }}</a></td>
+		<td><a href="/sofile?id={{ s.sofile.id }}">{{ s.sofile.filename }}</a></td>
+		<td>{{ s.s_type }}</td>
+	</tr>
+	{%endfor %}
+</table>
+
+{% elif sofile %}
+	<div>Module {{ sofile.filename }}</div>
+	<div>Path: {{ sofile.path }}</div>
+<table style="width:100%">
+	<tr>
+		<th>name</th><th>type</th>
+	</tr>
+	{% for s in sofile.symbols %}
+	<tr>
+		<td><a href="/symbol?sym={{ s.name | urlencode }}">{{ s.name }}</a></td><td>{{ s.s_type }}</td>
+	</tr>
+	{%endfor %}
+</table>
+
+
 {% else %}
   <h1>Hello, World!</h1>
+}
+}
 {% endif %}
 </body>
 </html>
