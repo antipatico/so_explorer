@@ -7,6 +7,9 @@ table, th, td {
   border: 1px solid black;
   border-collapse: collapse;
 }
+td, th {
+	word-wrap: break-word;
+}
 </style>
 </head>
 <body>
@@ -17,13 +20,13 @@ table, th, td {
 </form>
 {% if symbols %}
 
-<table style="width:100%">
+<table style="table-layout: fixed; width:100%">
 	<tr>
-		<th>name</th><th>type</th><th>count</th>
+		<th style="width: 90%">name</th><th>type</th><th>count</th>
 	</tr>
 	{% for name, s_type, count in symbols %}
 	<tr>
-		<td><a href="/symbol?sym={{ name | urlencode }}">{{ name }}</a></td><td>{{ s_type }}</td><td>{{ count }}</td>
+		<td style="width: 90%"><a href="/symbol?sym={{ name | urlencode }}">{{ name }}</a></td><td>{{ s_type }}</td><td>{{ count }}</td>
 	</tr>
 	{%endfor %}
 </table>
@@ -48,13 +51,13 @@ table, th, td {
 {% elif sofile %}
 	<div>Module {{ sofile.filename }}</div>
 	<div>Path: {{ sofile.path }}</div>
-<table style="width:100%">
+<table style="table-layout: fixed; width:100%">
 	<tr>
-		<th>name</th><th>type</th>
+		<th style="width: 95%">name</th><th>type</th>
 	</tr>
 	{% for s in sofile.symbols %}
 	<tr>
-		<td><a href="/symbol?sym={{ s.name | urlencode }}">{{ s.name }}</a></td><td>{{ s.s_type }}</td>
+		<td style="width: 95%"><a href="/symbol?sym={{ s.name | urlencode }}">{{ s.name }}</a></td><td>{{ s.s_type }}</td>
 	</tr>
 	{%endfor %}
 </table>
