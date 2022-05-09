@@ -64,10 +64,17 @@ def read_symbols(filename):
 		entry=str(entry.strip(b'\n'), 'utf-8')
 		#print(entry)
 		addr = entry[:8]
-		stype = entry[9]
-		name = entry[11:]
+		if addr != " " * 8:
+			addr, stype, name = entry.split(" ", 2)
+		else:
+			#print("addr is empty")
+			#print(addr)
+			#print(entry.lstrip(" ").split(" ", 1))
+			stype, name = entry.lstrip(" ").split(" ", 1)
+		#stype = entry[9]
+		#name = entry[11:]
 		v = {"address":addr, "stype":stype, "name":name}
-		#print(v)
+		print(v)
 		symbols.append(v)
 	return symbols
 
