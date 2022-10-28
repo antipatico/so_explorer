@@ -97,6 +97,9 @@ def is_elf_file(filename):
 			return True
 
 def process_sofile(filename):
+	if os.path.islink(filename):
+		print("WARNING: file %s is a symlink"%(os.path.basename(filename)))
+		return
 	if not is_elf_file(filename):
 		print("WARNING: file %s not ELF file"%(os.path.basename(filename)))
 		return
