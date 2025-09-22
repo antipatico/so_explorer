@@ -74,7 +74,7 @@ def sofile_get(session, id):
 
 def read_symbols(filename):
     p = Popen(
-        ["/usr/bin/nm", "-D", "-C", filename], stdin=DEVNULL, stdout=PIPE, bufsize=2048
+        ["arm-none-eabi-nm", "-D", "-C", filename], stdin=DEVNULL, stdout=PIPE, bufsize=2048
     )
     symbols = []
     while True:
@@ -188,8 +188,7 @@ def main():
                 process_sofile(f)
     elif args.action == "serve":
         import so_explorer.web_interface
-
-        web_interface.run(session)
+        so_explorer.web_interface.run(session)
     else:
         parser.print_help()
 
