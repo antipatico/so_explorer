@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "0.0.1"
+requires-python = ">= 3.12"
+name = "so_explorer"
+description = "Index ELF files export and import symbols and explore them"
+dependencies = [
+  "sqlalchemy",
+  "flask",
+]
+authors = [
+  {name = "Aris Adamantiadis", email="aris@0xbadc0de.be"},
+]
+maintainers = [
+  {name = "Jacopo Scannella", email="code@bootkit.dev"},
+]
+
+[project.scripts]
+so_explorer = "so_explorer.cli:main"
+
+[tool.setuptools]
+packages = [ "so_explorer" ]
